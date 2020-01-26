@@ -10,7 +10,7 @@ class PdfModify:
         fl=open(contents,'r',encoding='utf-8')
         self.bookmarklist=fl.readlines()
         fl.close()
-        self.rank=0
+        self.rank=[0]
         self.parent=[]
         self.outputtitle="bookmarked-"+inputfile
     def add_one_bookmark(self, rawbookmark):
@@ -21,19 +21,19 @@ class PdfModify:
         content=re.sub(r"\s+\d+(\n|$)",'',l)
         p=re.findall(r"\d+",rawbookmark)
         page=int(p[-1])+self.shift-1
-        if i<self.rank:
-            self.parent=self.parent[:-2]
-        elif i==self.rank:
-            self.parent=self.parent[:-1]
-        else:
-            pass
-        if len(self.parent)==0:
+        n=-1
+        if i<=self.rank[n]:
+            while i<self.rank[n]:
+                n=n-1
+            self.rank=self.rank[:n]
+            self.parent=self.parent[:n]
+        self.rank.append(i)
+        if self.rank[-1]==0:
             newparent=self.output.addBookmark(content,page)
             self.parent.append(newparent)
         else:
             newparent=self.output.addBookmark(content,page,self.parent[-1])
             self.parent.append(newparent)
-        self.rank=i
     def add_bookmarks(self):
         for rawbookmark in self.bookmarklist:
             self.add_one_bookmark(rawbookmark)
